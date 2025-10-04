@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # Service base de données SQLite
+  sqlite-db:
+    image: alpine:latest
+    container_name: sqlite-database
+    volumes:
+      - ./data:/data
+    command: >
+      sh -c "
+        apk add --no-cache sqlite &&
+        sqlite3 /data/ventes.db 'SELECT 1;' &&
+        echo 'Base de données SQLite prête' &&
+        tail -f /dev/null
+      "
+    healthcheck:
+      test: ["CMD", "sqlite3", "/data/ventes.db", "SELECT 1;"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Service scripts Python
+  python-scripts:
+    build: .
+    container_name: python-scripts
+    depends_on:
+      sqlite-db:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
+      - ./scripts:/app/scripts
+      - ./results:/app/results
+    environment:
+      - DATABASE_PATH=/data/ventes.db
+    command: >
+      sh -c "
+        echo 'Attente de la base de données...' &&
+        sleep 5 &&
+        python scripts/main.py
+      "
+
+volumes:
+  data:
+    driver: local
