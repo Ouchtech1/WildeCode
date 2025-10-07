@@ -180,5 +180,3 @@ Pour toute question ou problème :
 3. Contacter l'équipe de développement
 
 ---
-
-**Projet réalisé dans le cadre de la formation Data Engineer**

@@ -1,35 +1,15 @@
 #!/usr/bin/env python3
-"""
-Script de collecte HTTP des données CSV
-"""
 
 import requests
 import os
 from typing import Optional
 
 class DataCollector:
-    """Collecteur de données via HTTP"""
     
     def __init__(self, base_url: str = "http://localhost:8000"):
-        """
-        Initialise le collecteur de données
-        
-        Args:
-            base_url: URL de base pour les données
-        """
         self.base_url = base_url
         
     def download_csv(self, filename: str, url: Optional[str] = None) -> bool:
-        """
-        Télécharge un fichier CSV via HTTP
-        
-        Args:
-            filename: Nom du fichier à télécharger
-            url: URL complète (optionnelle)
-            
-        Returns:
-            bool: True si le téléchargement a réussi
-        """
         if url is None:
             url = f"{self.base_url}/{filename}"
             
@@ -39,7 +19,6 @@ class DataCollector:
             response = requests.get(url, timeout=30)
             response.raise_for_status()
             
-            # Sauvegarder le fichier
             with open(filename, 'wb') as f:
                 f.write(response.content)
                 
@@ -54,12 +33,6 @@ class DataCollector:
             return False
     
     def collect_all_data(self) -> bool:
-        """
-        Collecte tous les fichiers de données
-        
-        Returns:
-            bool: True si tous les téléchargements ont réussi
-        """
         print("Début de la collecte des données via HTTP")
         print("=" * 50)
         
@@ -86,13 +59,6 @@ class DataCollector:
             return False
     
     def create_local_server(self) -> bool:
-        """
-        Crée un serveur HTTP local pour servir les fichiers CSV
-        (Simulation pour les tests)
-        
-        Returns:
-            bool: True si le serveur a été créé
-        """
         print("Création d'un serveur HTTP local pour les tests...")
         
         try:
@@ -100,7 +66,6 @@ class DataCollector:
             import threading
             import time
             
-            # Vérifier que les fichiers CSV existent
             csv_files = ["magasins.csv", "produits.csv", "ventes.csv"]
             missing_files = []
             
@@ -112,18 +77,15 @@ class DataCollector:
                 print(f"Fichiers manquants: {missing_files}")
                 return False
             
-            # Créer le serveur HTTP
             server = HTTPServer(('localhost', 8000), SimpleHTTPRequestHandler)
             
             def run_server():
                 print("Serveur HTTP démarré sur http://localhost:8000")
                 server.serve_forever()
             
-            # Démarrer le serveur dans un thread
             server_thread = threading.Thread(target=run_server, daemon=True)
             server_thread.start()
             
-            # Attendre que le serveur démarre
             time.sleep(1)
             
             print("Serveur HTTP local créé avec succès")
@@ -134,17 +96,14 @@ class DataCollector:
             return False
 
 def main():
-    """Fonction principale pour la collecte des données"""
     print("COLLECTE DES DONNEES VIA HTTP")
     print("=" * 60)
     
     collector = DataCollector()
     
-    # Créer un serveur local pour les tests
     if collector.create_local_server():
         print("\nTest de la collecte HTTP...")
         
-        # Tester la collecte (les fichiers seront téléchargés depuis le serveur local)
         success = collector.collect_all_data()
         
         if success:

@@ -1,31 +1,18 @@
 #!/usr/bin/env python3
-"""
-Gestionnaire de base de données SQLite
-"""
 
 import sqlite3
 import os
 from typing import Optional
 
 class DatabaseManager:
-    """Gestionnaire de base de données SQLite"""
     
     def __init__(self, db_path: str = "data/ventes.db"):
-        """
-        Initialise le gestionnaire de base de données
-        
-        Args:
-            db_path: Chemin vers le fichier de base de données
-        """
         self.db_path = db_path
         self.connection: Optional[sqlite3.Connection] = None
         
     def connect(self) -> sqlite3.Connection:
-        """Établit une connexion à la base de données"""
         try:
-            # Créer le répertoire si nécessaire
             os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-            
             self.connection = sqlite3.connect(self.db_path)
             self.connection.row_factory = sqlite3.Row
             print(f"Connexion à la base de données établie: {self.db_path}")
@@ -35,14 +22,12 @@ class DatabaseManager:
             raise
     
     def create_tables(self):
-        """Crée toutes les tables nécessaires"""
         if not self.connection:
             self.connect()
             
         cursor = self.connection.cursor()
         
         try:
-            # Table MAGASIN
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS MAGASIN (
                     ID_Magasin INTEGER PRIMARY KEY,
@@ -52,7 +37,6 @@ class DatabaseManager:
                 )
             """)
             
-            # Table PRODUIT
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS PRODUIT (
                     ID_Reference TEXT PRIMARY KEY,
@@ -62,7 +46,6 @@ class DatabaseManager:
                 )
             """)
             
-            # Table VENTE
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS VENTE (
                     ID_Vente INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,7 +59,6 @@ class DatabaseManager:
                 )
             """)
             
-            # Table ANALYSE_RESULTATS
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS ANALYSE_RESULTATS (
                     ID_Analyse INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,7 +69,6 @@ class DatabaseManager:
                 )
             """)
             
-            # Créer les index
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_vente_date ON VENTE(Date)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_vente_magasin ON VENTE(ID_Magasin)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_vente_produit ON VENTE(ID_Reference_Produit)")
@@ -102,7 +83,6 @@ class DatabaseManager:
             raise
     
     def get_region_from_city(self, city: str) -> str:
-        """Retourne la région française correspondant à la ville"""
         regions = {
             'Paris': 'Île-de-France',
             'Marseille': 'Provence-Alpes-Côte d\'Azur',
@@ -115,7 +95,6 @@ class DatabaseManager:
         return regions.get(city, 'Région inconnue')
     
     def check_table_exists(self, table_name: str) -> bool:
-        """Vérifie si une table existe"""
         if not self.connection:
             self.connect()
             
@@ -128,7 +107,6 @@ class DatabaseManager:
         return cursor.fetchone() is not None
     
     def get_table_count(self, table_name: str) -> int:
-        """Retourne le nombre d'enregistrements dans une table"""
         if not self.connection:
             self.connect()
             
@@ -137,13 +115,11 @@ class DatabaseManager:
         return cursor.fetchone()[0]
     
     def close(self):
-        """Ferme la connexion à la base de données"""
         if self.connection:
             self.connection.close()
             print("Connexion à la base de données fermée")
 
-def main():
-    """Fonction principale pour tester la création des tables"""
+if __name__ == "__main__":
     print("Initialisation de la base de données...")
     
     db_manager = DatabaseManager()
@@ -151,7 +127,6 @@ def main():
         db_manager.connect()
         db_manager.create_tables()
         
-        # Vérifier les tables créées
         tables = ['MAGASIN', 'PRODUIT', 'VENTE', 'ANALYSE_RESULTATS']
         for table in tables:
             if db_manager.check_table_exists(table):
@@ -164,6 +139,3 @@ def main():
         print(f"Erreur: {e}")
     finally:
         db_manager.close()
-
-if __name__ == "__main__":
-    main()

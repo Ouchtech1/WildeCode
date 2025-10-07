@@ -82,5 +82,3 @@
 - Vérification par combinaison Date + Produit + Quantité + Magasin
 
 ---
-
-*Rapport généré par le système d'analyse des ventes PME*

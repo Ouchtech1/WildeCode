@@ -1,7 +1,6 @@
 # NOTE DES RÉSULTATS D'ANALYSE
-## Projet Simplon - Data Engineer
 
-### Date d'analyse : 4 octobre 2025
+Date d'analyse : 4 octobre 2025
 
 ---
 
@@ -127,5 +126,3 @@ ORDER BY CA_Region DESC;
 - **Langage** : Python 3.11 avec pandas et requests
 
 ---
-
-*Note générée automatiquement par le système d'analyse des ventes PME*

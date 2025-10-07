@@ -1,38 +1,20 @@
 #!/usr/bin/env python3
-"""
-Analyse des ventes avec requêtes SQL
-"""
 
 import sqlite3
 import json
 from datetime import datetime
-from typing import Dict, List, Any
 from database import DatabaseManager
 
 class SalesAnalyzer:
-    """Analyseur des ventes avec requêtes SQL"""
     
     def __init__(self, db_manager: DatabaseManager):
-        """
-        Initialise l'analyseur de ventes
-        
-        Args:
-            db_manager: Instance du gestionnaire de base de données
-        """
         self.db_manager = db_manager
         
-    def get_chiffre_affaires_total(self) -> Dict[str, Any]:
-        """
-        Calcule le chiffre d'affaires total
-        
-        Returns:
-            dict: Résultat de l'analyse avec le CA total
-        """
+    def get_chiffre_affaires_total(self):
         print("Calcul du chiffre d'affaires total...")
         
         cursor = self.db_manager.connection.cursor()
         
-        # Requête pour le CA total
         cursor.execute("""
             SELECT 
                 SUM(Montant_Total) as CA_Total,
@@ -53,24 +35,16 @@ class SalesAnalyzer:
             'periode_fin': result[3]
         }
         
-        # Stocker le résultat en base
         self._store_analysis_result(analysis_result)
         
         print(f"CA Total: {analysis_result['chiffre_affaires_total']}€")
         return analysis_result
     
-    def get_ventes_par_produit(self) -> Dict[str, Any]:
-        """
-        Analyse les ventes par produit
-        
-        Returns:
-            dict: Résultat de l'analyse par produit
-        """
+    def get_ventes_par_produit(self):
         print("Analyse des ventes par produit...")
         
         cursor = self.db_manager.connection.cursor()
         
-        # Requête pour les ventes par produit
         cursor.execute("""
             SELECT 
                 p.ID_Reference,
@@ -105,24 +79,16 @@ class SalesAnalyzer:
             'nombre_produits': len(produits_analysis)
         }
         
-        # Stocker le résultat en base
         self._store_analysis_result(analysis_result)
         
         print(f"Analyse de {len(produits_analysis)} produits terminée")
         return analysis_result
     
-    def get_ventes_par_region(self) -> Dict[str, Any]:
-        """
-        Analyse les ventes par région
-        
-        Returns:
-            dict: Résultat de l'analyse par région
-        """
+    def get_ventes_par_region(self):
         print("Analyse des ventes par région...")
         
         cursor = self.db_manager.connection.cursor()
         
-        # Requête pour les ventes par région
         cursor.execute("""
             SELECT 
                 m.Region,
@@ -155,22 +121,14 @@ class SalesAnalyzer:
             'nombre_regions': len(regions_analysis)
         }
         
-        # Stocker le résultat en base
         self._store_analysis_result(analysis_result)
         
         print(f"Analyse de {len(regions_analysis)} régions terminée")
         return analysis_result
     
-    def _store_analysis_result(self, result: Dict[str, Any]):
-        """
-        Stocke le résultat d'analyse en base de données
-        
-        Args:
-            result: Résultat de l'analyse à stocker
-        """
+    def _store_analysis_result(self, result):
         cursor = self.db_manager.connection.cursor()
         
-        # Extraire la valeur numérique
         valeur_numerique = None
         if 'chiffre_affaires_total' in result:
             valeur_numerique = result['chiffre_affaires_total']
@@ -190,24 +148,14 @@ class SalesAnalyzer:
         
         self.db_manager.connection.commit()
     
-    def generate_summary_report(self) -> Dict[str, Any]:
-        """
-        Génère un rapport de synthèse de toutes les analyses
-        
-        Returns:
-            dict: Rapport de synthèse
-        """
+    def generate_summary_report(self):
         print("Génération du rapport de synthèse...")
         
-        # Exécuter toutes les analyses
         ca_total = self.get_chiffre_affaires_total()
         ventes_produits = self.get_ventes_par_produit()
         ventes_regions = self.get_ventes_par_region()
         
-        # Trouver le produit le plus vendu
         produit_top = max(ventes_produits['produits'], key=lambda x: x['ca_produit'])
-        
-        # Trouver la région avec le plus gros CA
         region_top = max(ventes_regions['regions'], key=lambda x: x['ca_region'])
         
         summary = {
@@ -233,24 +181,17 @@ class SalesAnalyzer:
         print("Rapport de synthèse généré")
         return summary
 
-def main():
-    """Fonction principale pour l'analyse des ventes"""
+if __name__ == "__main__":
     print("Début de l'analyse des ventes...")
     
-    # Initialiser le gestionnaire de base de données
     db_manager = DatabaseManager()
     
     try:
-        # Se connecter à la base de données
         db_manager.connect()
         
-        # Initialiser l'analyseur
         analyzer = SalesAnalyzer(db_manager)
-        
-        # Générer le rapport de synthèse
         summary = analyzer.generate_summary_report()
         
-        # Afficher les résultats
         print("\n" + "="*50)
         print("RAPPORT D'ANALYSE DES VENTES")
         print("="*50)
@@ -265,6 +206,3 @@ def main():
         print(f"Erreur lors de l'analyse: {e}")
     finally:
         db_manager.close()
-
-if __name__ == "__main__":
-    main()
